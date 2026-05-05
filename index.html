@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Karol Martins Studio | Agenda</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <a class="brand" href="#agendar" aria-label="Karol Martins Studio">
+          <img src="assets/KarolMartinsLogo2.png" alt="Karol Martins Studio Elegance" />
+        </a>
+        <nav class="nav" aria-label="Navegação principal">
+          <button class="nav-link active" data-view="schedule">Agendar</button>
+          <button class="nav-link auth-only" data-view="dashboard">Dashboard</button>
+          <button class="nav-link auth-only" data-view="appointments">Agendados</button>
+          <button class="nav-link auth-only admin-only" data-view="services">Serviços</button>
+          <button class="nav-link auth-only admin-only" data-view="users">Usuários</button>
+          <button class="nav-link auth-only admin-only" data-view="settings">Configurações</button>
+        </nav>
+        <div class="session-box">
+          <div id="sessionInfo" class="session-info">Área pública</div>
+          <button id="loginToggle" class="ghost-button">Entrar</button>
+        </div>
+      </aside>
+
+      <main class="main">
+        <section id="scheduleView" class="view active-view">
+          <div class="view-heading">
+            <span class="eyebrow">Agenda pública</span>
+            <h1>Escolha seu procedimento e horário</h1>
+            <p>Os horários ocupados são ocultados. O sistema valida o intervalo completo do procedimento antes da confirmação.</p>
+          </div>
+
+          <div class="booking-layout">
+            <form id="bookingForm" class="panel booking-form">
+              <label>
+                Nome do cliente
+                <input id="clientName" required autocomplete="name" placeholder="Seu nome" />
+              </label>
+              <label>
+                Telefone
+                <input id="clientPhone" required inputmode="tel" placeholder="(00) 00000-0000" />
+              </label>
+              <label>
+                Data
+                <input id="bookingDate" required type="date" />
+              </label>
+              <label>
+                Procedimento
+                <select id="serviceSelect" required></select>
+              </label>
+              <label>
+                Observações
+                <textarea id="bookingNotes" rows="4" placeholder="Algum detalhe importante?"></textarea>
+              </label>
+              <div id="servicePreview" class="service-preview"></div>
+            </form>
+
+            <div class="panel time-panel">
+              <div class="panel-title">
+                <div>
+                  <span class="eyebrow">Disponibilidade</span>
+                  <h2>Horários disponíveis</h2>
+                </div>
+                <div class="legend">
+                  <span><i class="dot ok"></i> Livre</span>
+                  <span><i class="dot warn"></i> Intervalo curto</span>
+                </div>
+              </div>
+              <div id="timeGrid" class="time-grid"></div>
+              <div class="confirm-box">
+                <div id="selectedSlotInfo" class="selected-slot">Nenhum horário selecionado</div>
+                <button id="confirmBooking" class="primary-button" type="button" disabled>Confirmar agendamento</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="dashboardView" class="view">
+          <div class="view-heading compact">
+            <span class="eyebrow">Painel</span>
+            <h1>Dashboard administrativo</h1>
+          </div>
+          <div id="dashboardCards" class="stats-grid"></div>
+          <div class="grid-two">
+            <div class="panel">
+              <div class="panel-title"><h2>Agenda do dia</h2></div>
+              <div id="todayList" class="list"></div>
+            </div>
+            <div class="panel">
+              <div class="panel-title"><h2>Ações rápidas</h2></div>
+              <div class="quick-actions">
+                <button class="primary-button" data-view-jump="schedule">Novo agendamento</button>
+                <button class="secondary-button admin-only" data-view-jump="services">Cadastrar serviço</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="appointmentsView" class="view">
+          <div class="view-heading compact">
+            <span class="eyebrow">Controle</span>
+            <h1>Agendados</h1>
+          </div>
+          <div class="panel toolbar">
+            <input id="appointmentSearch" placeholder="Buscar por cliente, telefone ou procedimento" />
+            <select id="appointmentStatusFilter">
+              <option value="">Todos os status</option>
+              <option>Agendado</option>
+              <option>Concluído</option>
+              <option>Cancelado</option>
+              <option>Não compareceu</option>
+            </select>
+          </div>
+          <div class="table-wrap panel">
+            <table>
+              <thead>
+                <tr>
+                  <th>Cliente</th>
+                  <th>Telefone</th>
+                  <th>Procedimento</th>
+                  <th>Data</th>
+                  <th>Início</th>
+                  <th>Fim</th>
+                  <th>Status</th>
+                  <th>Obs.</th>
+                </tr>
+              </thead>
+              <tbody id="appointmentsTable"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="servicesView" class="view">
+          <div class="view-heading compact">
+            <span class="eyebrow">Administração</span>
+            <h1>Serviços</h1>
+          </div>
+          <div class="grid-two">
+            <form id="serviceForm" class="panel stacked-form">
+              <input type="hidden" id="serviceId" />
+              <label>Nome <input id="serviceName" required /></label>
+              <label>Duração em minutos <input id="serviceDuration" required min="30" step="30" type="number" /></label>
+              <label>Valor <input id="servicePrice" placeholder="Ex: 180,00" /></label>
+              <label>Foto <input id="servicePhoto" type="file" accept="image/*" /></label>
+              <label>Descrição <textarea id="serviceDescription" rows="4"></textarea></label>
+              <label class="switch-row"><input id="serviceActive" type="checkbox" checked /> Serviço ativo</label>
+              <button class="primary-button" type="submit">Salvar serviço</button>
+              <button id="clearServiceForm" class="ghost-button" type="button">Limpar</button>
+            </form>
+            <div id="servicesList" class="cards-list"></div>
+          </div>
+        </section>
+
+        <section id="usersView" class="view">
+          <div class="view-heading compact">
+            <span class="eyebrow">Acessos</span>
+            <h1>Usuários e permissões</h1>
+          </div>
+          <div class="grid-two">
+            <form id="userForm" class="panel stacked-form">
+              <input type="hidden" id="userId" />
+              <label>Nome <input id="userName" required /></label>
+              <label>Email <input id="userEmail" required type="email" /></label>
+              <label>Senha <input id="userPassword" type="password" placeholder="Manter atual se vazio" /></label>
+              <label>Tipo
+                <select id="userRole">
+                  <option value="admin">Administrador</option>
+                  <option value="reception">Recepcionista</option>
+                </select>
+              </label>
+              <label class="switch-row"><input id="userActive" type="checkbox" checked /> Usuário ativo</label>
+              <button class="primary-button" type="submit">Salvar usuário</button>
+              <button id="clearUserForm" class="ghost-button" type="button">Limpar</button>
+            </form>
+            <div id="usersList" class="cards-list"></div>
+          </div>
+        </section>
+
+        <section id="settingsView" class="view">
+          <div class="view-heading compact">
+            <span class="eyebrow">Operação</span>
+            <h1>Configurações</h1>
+          </div>
+          <form id="settingsForm" class="panel settings-grid">
+            <label>Horário de início <input id="startTime" required type="time" /></label>
+            <label>Horário de término <input id="endTime" required type="time" /></label>
+            <label>Intervalo padrão <input id="slotInterval" required min="30" step="30" type="number" /></label>
+            <fieldset>
+              <legend>Dias de funcionamento</legend>
+              <label><input type="checkbox" name="workingDays" value="1" /> Segunda</label>
+              <label><input type="checkbox" name="workingDays" value="2" /> Terça</label>
+              <label><input type="checkbox" name="workingDays" value="3" /> Quarta</label>
+              <label><input type="checkbox" name="workingDays" value="4" /> Quinta</label>
+              <label><input type="checkbox" name="workingDays" value="5" /> Sexta</label>
+              <label><input type="checkbox" name="workingDays" value="6" /> Sábado</label>
+              <label><input type="checkbox" name="workingDays" value="0" /> Domingo</label>
+            </fieldset>
+            <label class="switch-row"><input id="receptionCanCancel" type="checkbox" /> Recepcionista pode cancelar</label>
+            <button class="primary-button" type="submit">Salvar configurações</button>
+          </form>
+        </section>
+      </main>
+    </div>
+
+    <dialog id="loginDialog" class="modal">
+      <form method="dialog" id="loginForm" class="modal-card">
+        <h2>Entrar no painel</h2>
+        <label>Email <input id="loginEmail" type="email" value="admin@karolmartins.local" required /></label>
+        <label>Senha <input id="loginPassword" type="password" value="admin123" required /></label>
+        <p class="hint">Acesso inicial: admin@karolmartins.local / admin123</p>
+        <div class="modal-actions">
+          <button class="ghost-button" value="cancel" type="button" data-close-modal>Voltar</button>
+          <button class="primary-button" type="submit">Entrar</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="conflictDialog" class="modal">
+      <form method="dialog" class="modal-card">
+        <h2>Intervalo insuficiente</h2>
+        <p id="conflictMessage"></p>
+        <div class="modal-actions">
+          <button id="conflictBack" class="ghost-button" value="cancel" type="button">Voltar</button>
+          <button id="conflictProceed" class="primary-button" value="confirm" type="button">Prosseguir mesmo assim</button>
+        </div>
+      </form>
+    </dialog>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
